@@ -1,0 +1,281 @@
+      
+ <div class="wrapper">
+
+      <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+            <a class="navbar-brand" href="#"> <img src='../../assets/todoicon.png' style="width:8%;margin-right: 4%"/><h5 style="font-family: cursive;display: inline;">To-Do App</h5></a>
+            <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+              
+            </ul>
+           
+          <button   class="btn btn-warning headerbtn" (click)="newList()">Create New</button>
+            
+          <button type="button" (click)="showSections()" class="btn btn-primary headerbtn">
+              Friends <span *ngIf="loading" class="badge badge-light">{{this.currentUserDetails.friendReq.length}}</span>
+            </button>
+        <button  (click)="logout()" type="button" class="btn btn-danger headerbtn">Logout</button>
+
+        
+          </div>
+        </nav>
+
+       
+        
+
+
+        <div class="flex-container">    
+
+
+
+            <div id='searchCol' >
+
+                <div  class="container" *ngIf="loading" style="height: 100%;padding: 3px;">
+      
+                <div class="row" style="height: 100%;overflow: auto;">
+                <div class="container" >
+
+                    <h5 style="color:white;font-style: italic;">{{currentUserDetails.firstName + " "+currentUserDetails.lastName}}<img src="../../assets/greendot.png" style="width: 13px;
+                      margin-top: -5px;
+                      margin-left: 4px;"/></h5>
+                      <hr/>
+                    <h5 style="color:white;font-style: italic;">Users </h5>
+                  <input class="form-control" placeholder="Search Users" type="text" [(ngModel)]="searchName" />
+                        
+                        
+
+                    <ng-container *ngIf="( allUsers | filter : searchName ) as result">
+                        <div *ngFor="let item of result">
+
+
+                            <div class="container friendsdiv"  *ngIf="userId!=item.userId">
+  
+                                <div class="form-inline" style="padding: 5px 0px">
+                                    <p style="margin-left:5px;margin-bottom: 0px">{{item.firstName + " "+item.lastName}}</p>
+                                    <button *ngIf='item.status=="new"' class="btn btn-primary btn-sm" (click)="sendRequest(item)" style="margin-left: 10px">Send Request</button>
+                                    <p  *ngIf='item.status=="sent"' style="color: green;margin-left: 20px;margin-bottom: 0px;font-style: italic;">Request Sent</p>
+                                    <p  *ngIf='item.status=="done"' style="color: green;margin-left: 20px;margin-bottom: 0px;font-style: italic;">Friends</p>
+                                    <p  *ngIf='item.status=="received"' style="color: green;margin-left: 20px;margin-bottom: 0px;font-style: italic;">Request Received</p>
+                                </div>
+                            </div>
+
+                          
+
+        
+
+                        
+                        </div>
+
+                        <h5  *ngIf="result.length === 0"style="color:white;font-style: italic;">No Users Found</h5>
+                      </ng-container>
+                    
+                </div>
+      
+                </div>
+            </div>
+            
+      
+          </div>
+          
+       
+        <div id="left_column">
+
+      <div class="containerDiv" *ngIf="loading">
+
+        <div *ngFor="let each of allLists;">
+
+       
+          <div class="card" id=card_{{each.listId}}>
+
+              <div class="card-header">
+
+                  <div class="d-flex align-items-center">
+                      <h3 class="mr-auto">{{each.listName}}</h3>
+                      <div class="btn-group" role="group">
+
+                          <i class="fas fa-undo" (click)="undo(each.listId)" style="margin-right: 10px;"></i>   
+                          <i  class="fas fa-check-circle" *ngIf="each.status" (click)="markListcomplete(each,false)"  style="color:#563d7c;margin-right: 10px;"></i>
+                          <i  class="far fa-check-circle" *ngIf="!each.status"  (click)="markListcomplete(each,true)" style="color:#563d7c;margin-right: 10px;"></i>
+                          <i class="fas fa-trash" (click)="deleteList(each.listId)"  style="color:#dc3545;margin-right: 10px;"></i>
+                          <i class="fas fa-edit" style="color:#007bff;margin-right: 10px;" (click)="processList('edit_-_'+each.listId,each.cards,each.listName);"></i>
+                          <i class="fas fa-plus"  style="color:green;" (click)="processList('add_-_'+each.listId,each.cards,null);"></i>
+                         
+                      
+                      </div>
+                    </div>
+              
+                    
+                </div>
+
+              <div class="card-body" >
+                 <div class="card-text">
+
+                 <div id="{{each.listId}}" class="cardData" [innerHTML]="addhtml(each.cards)"></div>
+
+                  <p *ngIf="each.collabrators && each.collabrators.length!=0" style="margin: 0;color: #5720ff;">Collabrators:</p>
+                    <div *ngFor="let collab of each.collabrators">
+                        <div *ngFor="let user of allUsers">
+                         <p style="margin: 0;" *ngIf="collab==user.userId && collab!=userId"> {{user.firstName +" " + user.lastName}}</p>
+                         </div>
+                         </div>
+
+                        </div>
+                 
+            
+            </div>
+         
+              
+        </div>
+
+        </div>
+
+
+       
+      </div>
+
+    </div>
+
+
+      <div id="right_column">
+
+          <div  class="container" *ngIf="loading" style="height: 100%;padding: 3px;">
+
+          <div class="row" style="height: 50%;overflow: auto;">
+          <div class="container" >
+              <h5 style="color:white;font-style: italic;">Friends</h5>
+              <hr />
+
+              <h5  *ngIf="currentUserDetails.friendList.length==0" style="color:white;font-style: italic;">No Friends added.</h5>
+             
+              <div *ngFor="let each of currentUserDetails.friendList" >
+                <div class="container friendsdiv" >
+  
+                    <div class="form-inline" style="padding: 5px 0px">
+                        <p style="margin-left:5px;margin-bottom: 0px">  {{each.fromName}} </p>
+                        </div>
+                </div>
+
+            </div>
+            
+          </div>
+
+          </div>
+
+     
+          <div class="row" style="height: 50%;overflow: auto"> 
+
+         <div class="container">
+            <h5 style="color:white;font-style: italic;" >Friend Requests</h5>
+          <hr/>
+            
+            <h5  *ngIf="currentUserDetails.friendReq.length==0" style="color:white;font-style: italic;">No Friends Requests.</h5>
+
+
+        
+            <div *ngFor="let each of currentUserDetails.friendReq" >
+                <div class="container friendsdiv" >
+  
+                    <div class="form-inline" style="padding: 5px 0px">
+                        <p style="margin-left:5px;margin-bottom: 0px">  {{each.fromName}} </p>
+                        <button class="btn btn-danger btn-sm" (click)="rejectRequest(each.fromUserId)" style="margin-left: 10px"><i class="fas fa-times" style="width:15px;"></i></button>
+                        <button class="btn btn-success btn-sm" (click)="acceptRequest(each.fromUserId)" style="margin-left: 10px"><i class="fas fa-check" style="width:15px;"></i></button>
+                    </div>
+                </div>
+
+            </div>
+          
+        </div>
+
+     
+
+      </div>
+
+      </div>
+      
+
+    </div>
+
+   
+         
+        </div>
+      
+
+      
+     
+
+      </div>
+
+
+        <ng-template #modalContent let-close="close">
+            <div class="modal-content">
+                  <div class="modal-header">
+                      <h5 class="modal-title">Create New Todo List</h5>
+                      <button type="button" (click)="closeModal()" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                       </div>
+          
+                       <div class="modal-body">
+                         <div>
+                         <input class="form-control" [(ngModel)]="newListName" placeholder="Enter Title">
+                        </div>
+                        <div style="margin-top: 20px;">
+                         <ng-selectize [config]="config" [options] = "collabData" [(ngModel)]="collabVal" placeholder="Select Collabrators/Friends" ></ng-selectize>
+                        </div>
+                       </div>
+                       <div class="modal-footer">
+                          <button type="button" (click)="saveNew()" class="btn btn-primary">Create</button>
+                       </div>
+            </div>
+          </ng-template>
+
+          <ng-template #modalContent2 let-close="close">
+              <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add/Edit Item</h5>
+                        <button type="button" class="close" (click)="closeModal()" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                         </div>
+            
+                         <div class="modal-body">
+                           <input class="form-control" required   (keyup) ="saveUpdatedListkey($event)"  [(ngModel)]="currentItemValue" placeholder="Enter Title">
+                           
+                        
+                         </div>
+                         <div class="modal-footer">
+                            <button type="button" (click)="saveUpdatedList()" class="btn btn-primary">Save</button>
+                         </div>
+              </div>
+            </ng-template>
+
+
+            <ng-template #modalContent1 let-close="close">
+                <div class="modal-content">
+                      <div class="modal-header">
+                          <h5 class="modal-title">Add/Edit Item</h5>
+                          <button type="button" class="close" (click)="closeModal()" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                           </div>
+              
+                           <div class="modal-body">
+                             <input class="form-control" (keyup) = "saveUpdatedCardKey($event)" [(ngModel)]="currentItemValue" placeholder="Enter Title">
+                           </div>
+                           <div class="modal-footer">
+                              <button type="button" (click)="saveUpdatedCard()" class="btn btn-primary">Save</button>
+                           </div>
+                </div>
+              </ng-template>
+
+
+       
+          
+        
+
+
+      
+
+
